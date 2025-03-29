@@ -12,6 +12,7 @@ import Swap from "./pages/Swap";
 import Liquidity from "./pages/Liquidity";
 import Governance from "./pages/Governance";
 import NotFound from "./pages/NotFound";
+import AuthPage from "./pages/Auth";
 
 // Create a client with explicit configuration
 const queryClient = new QueryClient({
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/swap" element={<Swap />} />
               <Route path="/liquidity" element={<Liquidity />} />
               <Route path="/governance" element={<Governance />} />
+              <Route path="/auth" element={<AuthPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

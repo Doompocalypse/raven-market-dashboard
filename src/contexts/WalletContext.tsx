@@ -9,6 +9,7 @@ import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
+import { supabase } from "@/integrations/supabase/client";
 
 // Import the wallet adapter CSS
 import '@solana/wallet-adapter-react-ui/styles.css';
@@ -20,6 +21,9 @@ type WalletContextProps = {
   disconnecting: boolean;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
+  user: any;
+  session: any;
+  signOut: () => Promise<void>;
 };
 
 const WalletContext = createContext<WalletContextProps | undefined>(undefined);
@@ -53,6 +57,40 @@ export const WalletContextProvider: FC<{ children: ReactNode }> = ({ children })
 
 const WalletContextInner: FC<{ children: ReactNode }> = ({ children }) => {
   const { publicKey, connected, connecting, disconnecting, connect, disconnect } = useWallet();
+  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
+  
+  useEffect(() => {
+    // Check if there's an active session when the component mounts
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      setUser(data.session?.user || null);
+    };
+    
+    getSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signOut = async () => {
+    try {
+      if (connected) {
+        await disconnect();
+      }
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
   
   return (
     <WalletContext.Provider
@@ -63,6 +101,9 @@ const WalletContextInner: FC<{ children: ReactNode }> = ({ children }) => {
         disconnecting,
         connect,
         disconnect,
+        user,
+        session,
+        signOut,
       }}
     >
       {children}
