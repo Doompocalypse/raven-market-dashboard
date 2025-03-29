@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -30,7 +29,6 @@ const PriceChart = ({ tokenSymbol, onRefresh, className = "" }: PriceChartProps)
     
     let filteredData = [...data];
     
-    // Filter based on time range
     if (timeRange === "24h") {
       filteredData = filteredData.slice(-24);
     } else if (timeRange === "7d") {
@@ -160,7 +158,12 @@ const PriceChart = ({ tokenSymbol, onRefresh, className = "" }: PriceChartProps)
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12 }}
-              tickFormatter={(value) => tokenData.currentPrice < 1 ? value.toFixed(3) : value.toFixed(0)}
+              tickFormatter={(value) => {
+                if (typeof value === 'number') {
+                  return tokenData.currentPrice < 1 ? value.toFixed(3) : value.toFixed(0);
+                }
+                return value;
+              }}
               width={40}
             />
             <ChartTooltip
@@ -174,7 +177,10 @@ const PriceChart = ({ tokenSymbol, onRefresh, className = "" }: PriceChartProps)
                     return String(label);
                   }}
                   formatter={(value) => {
-                    return [`$${value.toFixed(tokenData.currentPrice < 1 ? 4 : 2)}`, "Price"];
+                    if (typeof value === 'number') {
+                      return [`$${value.toFixed(tokenData.currentPrice < 1 ? 4 : 2)}`, "Price"];
+                    }
+                    return [`${value}`, "Price"];
                   }}
                 />
               }
