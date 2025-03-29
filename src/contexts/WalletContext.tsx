@@ -1,5 +1,5 @@
 
-import { createContext, useContext, FC, ReactNode, useMemo, useState, useEffect } from 'react';
+import React, { createContext, useContext, FC, ReactNode, useMemo, useState, useEffect } from 'react';
 import {
   ConnectionProvider,
   WalletProvider,

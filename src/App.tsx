@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,27 +13,37 @@ import Liquidity from "./pages/Liquidity";
 import Governance from "./pages/Governance";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Create a client with explicit configuration
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <WalletContextProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/swap" element={<Swap />} />
-            <Route path="/liquidity" element={<Liquidity />} />
-            <Route path="/governance" element={<Governance />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </WalletContextProvider>
-  </QueryClientProvider>
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <WalletContextProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/swap" element={<Swap />} />
+              <Route path="/liquidity" element={<Liquidity />} />
+              <Route path="/governance" element={<Governance />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </WalletContextProvider>
+    </QueryClientProvider>
+  </React.StrictMode>
 );
 
 export default App;
