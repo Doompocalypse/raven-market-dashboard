@@ -1,24 +1,10 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import StakingDashboard from "@/components/StakingDashboard";
 import FactionLeaderboard from "@/components/FactionLeaderboard";
-import ProposalVoting from "@/components/ProposalVoting";
 import LiveStats from "@/components/LiveStats";
 import Navbar from "@/components/Navbar";
-import { connectSocket, disconnectSocket } from "@/services/api";
-import { useEffect } from "react";
 
-const Index = () => {
-  // Connect to Socket.io when the component mounts
-  useEffect(() => {
-    connectSocket();
-    
-    // Disconnect when the component unmounts
-    return () => {
-      disconnectSocket();
-    };
-  }, []);
-
+const Analytics = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
@@ -26,21 +12,28 @@ const Index = () => {
         <div className="grid gap-6">
           <Card className="border-none bg-gradient-to-r from-primary/5 to-accent/5">
             <CardHeader className="pb-3">
-              <CardTitle className="text-3xl">Welcome to Raven DMM</CardTitle>
+              <CardTitle className="text-3xl">Analytics</CardTitle>
               <CardDescription className="text-lg">
-                Decentralized Market Making on Solana
+                Real-time statistics for Raven DMM
               </CardDescription>
             </CardHeader>
           </Card>
 
           <LiveStats />
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Market Overview</CardTitle>
+              <CardDescription>Coming soon - detailed market analytics</CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center items-center py-20">
+              <div className="text-center text-muted-foreground">
+                Advanced analytics features will be available soon
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <StakingDashboard />
-            <FactionLeaderboard />
-          </div>
-
-          <ProposalVoting />
+          <FactionLeaderboard />
         </div>
       </main>
 
@@ -53,4 +46,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Analytics;
