@@ -1,209 +1,182 @@
 
-import { useState, useEffect } from "react";
-import { getProposals, ProposalData, voteOnProposal, executeProposal, subscribeToProposalUpdates } from "@/services/api";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { useWalletContext } from "@/contexts/WalletContext";
+import { getProposals, voteOnProposal, executeProposal, subscribeToProposalUpdates, ProposalData } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
+import { CheckCircle2, XCircle, Clock, ThumbsUp } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-const ProposalVoting = () => {
-  const { connected } = useWalletContext();
-  const [proposals, setProposals] = useState<ProposalData[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+interface ProposalVotingProps {
+  factionFilter?: string | null;
+}
+
+const ProposalVoting = ({ factionFilter }: ProposalVotingProps) => {
   const { toast } = useToast();
+  const [proposals, setProposals] = useState<ProposalData[]>([]);
 
-  const fetchProposals = async () => {
-    setLoading(true);
-    try {
-      const data = await getProposals();
-      setProposals(data.filter(p => p.status === 'active'));
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch proposal data.",
-        variant: "destructive",
-      });
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Fetch proposals
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["proposals"],
+    queryFn: getProposals,
+  });
 
   useEffect(() => {
-    fetchProposals();
+    if (data) {
+      setProposals(data);
+    }
+  }, [data]);
 
-    // Set up Socket.io for real-time updates
+  // Subscribe to proposal updates
+  useEffect(() => {
     const unsubscribe = subscribeToProposalUpdates((updatedProposal) => {
-      setProposals(prevProposals => {
-        const index = prevProposals.findIndex(p => p.id === updatedProposal.id);
-        if (index === -1) {
-          if (updatedProposal.status === 'active') {
-            return [...prevProposals, updatedProposal];
-          }
-          return prevProposals;
-        }
+      setProposals((prevProposals) => {
+        // Find if the proposal already exists
+        const existingIndex = prevProposals.findIndex(p => p.id === updatedProposal.id);
         
-        if (updatedProposal.status !== 'active') {
-          return prevProposals.filter(p => p.id !== updatedProposal.id);
+        if (existingIndex >= 0) {
+          // Update existing proposal
+          const newProposals = [...prevProposals];
+          newProposals[existingIndex] = updatedProposal;
+          return newProposals;
+        } else {
+          // Add new proposal
+          return [...prevProposals, updatedProposal];
         }
-        
-        const updatedProposals = [...prevProposals];
-        updatedProposals[index] = updatedProposal;
-        return updatedProposals;
       });
-      
+
       toast({
         title: "Proposal Updated",
-        description: `"${updatedProposal.title}" has been updated.`,
+        description: `${updatedProposal.title} has been updated.`,
       });
     });
 
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+    return unsubscribe;
+  }, [toast]);
 
   const handleVote = async (proposalId: string) => {
-    if (!connected) {
-      toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to vote on proposals.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setActionLoading(proposalId);
     try {
       await voteOnProposal(proposalId);
       
-      // Update the proposal in state
-      setProposals(prevProposals => 
-        prevProposals.map(p => 
-          p.id === proposalId ? { ...p, votes: p.votes + 1 } : p
-        )
-      );
-      
+      // Update local state optimistically
+      setProposals(prevProposals => {
+        return prevProposals.map(proposal => {
+          if (proposal.id === proposalId) {
+            return { ...proposal, votes: proposal.votes + 1 };
+          }
+          return proposal;
+        });
+      });
+
       toast({
-        title: "Vote Successful",
-        description: "Your vote has been recorded.",
+        title: "Vote Submitted",
+        description: "Your vote has been recorded successfully.",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to vote on proposal.",
+        title: "Vote Failed",
+        description: "There was an error submitting your vote.",
         variant: "destructive",
       });
-      console.error(error);
-    } finally {
-      setActionLoading(null);
     }
   };
 
   const handleExecute = async (proposalId: string) => {
-    if (!connected) {
-      toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to execute proposals.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setActionLoading(proposalId);
     try {
       await executeProposal(proposalId);
       
-      // Remove the proposal from the list
-      setProposals(prevProposals => 
-        prevProposals.filter(p => p.id !== proposalId)
-      );
-      
+      // Update local state optimistically
+      setProposals(prevProposals => {
+        return prevProposals.map(proposal => {
+          if (proposal.id === proposalId) {
+            return { ...proposal, status: "executed" as const };
+          }
+          return proposal;
+        });
+      });
+
       toast({
-        title: "Execution Successful",
-        description: "The proposal has been executed.",
+        title: "Proposal Executed",
+        description: "The proposal has been executed successfully.",
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to execute proposal.",
+        title: "Execution Failed",
+        description: "There was an error executing the proposal.",
         variant: "destructive",
       });
-      console.error(error);
-    } finally {
-      setActionLoading(null);
     }
   };
 
+  // Get the filtered proposals
+  const filteredProposals = factionFilter 
+    ? proposals.filter(p => p.factionId === factionFilter)
+    : proposals;
+
+  const activeProposals = filteredProposals.filter(p => p.status === "active");
+
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Active Proposals</CardTitle>
-        <CardDescription>Vote on and execute faction vault proposals</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="animate-spin h-8 w-8" />
-          </div>
-        ) : (
-          <div className="space-y-4 proposal-list">
-            {proposals.length === 0 && (
-              <div className="text-center py-12 text-muted-foreground">
-                No active proposals at this time
-              </div>
-            )}
-            {proposals.map((proposal) => (
-              <Card key={proposal.id} className="overflow-hidden">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">{proposal.title}</CardTitle>
-                  <CardDescription className="line-clamp-2">
-                    {proposal.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="text-sm text-muted-foreground">
-                      Proposer: {proposal.proposer.slice(0, 6)}...{proposal.proposer.slice(-4)}
+    <div className="space-y-6">
+      {isLoading ? (
+        <div className="text-center p-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="mt-2 text-muted-foreground">Loading proposals<span className="loading-dots"></span></p>
+        </div>
+      ) : activeProposals.length === 0 ? (
+        <div className="text-center py-12">
+          <Clock className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-4 text-lg font-medium">No active proposals</h3>
+          <p className="mt-2 text-muted-foreground">
+            {factionFilter ? "This faction has no active proposals." : "Check back later for new proposals to vote on."}
+          </p>
+        </div>
+      ) : (
+        <ScrollArea className="proposal-list rounded-md pr-4">
+          <div className="space-y-4">
+            {activeProposals.map((proposal) => (
+              <Card key={proposal.id} className="overflow-hidden border-accent/20">
+                <CardContent className="p-0">
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-medium">{proposal.title}</h3>
+                      <Badge variant={proposal.votes >= proposal.requiredVotes ? "default" : "outline"} className="ml-2">
+                        {proposal.votes}/{proposal.requiredVotes} votes
+                      </Badge>
                     </div>
-                    <div>
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary">
-                        Votes: {proposal.votes}/{proposal.requiredVotes}
-                      </span>
+                    <p className="text-sm text-muted-foreground mb-3">{proposal.description}</p>
+                    <div className="flex items-center text-xs text-muted-foreground mb-4">
+                      <span>Proposed by {proposal.proposer.substring(0, 6)}...{proposal.proposer.substring(proposal.proposer.length - 4)}</span>
                     </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      onClick={() => handleVote(proposal.id)}
-                      disabled={actionLoading !== null || !connected}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      {actionLoading === proposal.id ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : null}
-                      Vote
-                    </Button>
-                    <Button
-                      onClick={() => handleExecute(proposal.id)}
-                      disabled={actionLoading !== null || proposal.votes < proposal.requiredVotes || !connected}
-                      className="w-full"
-                    >
-                      {actionLoading === proposal.id ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : null}
-                      Execute
-                    </Button>
+                    <div className="flex space-x-3 justify-end">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleVote(proposal.id)}
+                        className="flex items-center"
+                      >
+                        <ThumbsUp className="mr-2 h-4 w-4" />
+                        Vote
+                      </Button>
+                      <Button 
+                        size="sm"
+                        onClick={() => handleExecute(proposal.id)}
+                        disabled={proposal.votes < proposal.requiredVotes}
+                        className="flex items-center"
+                      >
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                        Execute
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </ScrollArea>
+      )}
+    </div>
   );
 };
 

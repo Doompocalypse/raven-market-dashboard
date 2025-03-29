@@ -1,19 +1,23 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import WalletConnect from "./WalletConnect";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, BarChart2, Repeat, Vote } from "lucide-react";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const location = useLocation();
 
   const navItems = [
-    { label: "Dashboard", href: "/" },
-    { label: "Analytics", href: "/analytics" },
-    { label: "Swap", href: "/swap" }
+    { label: "Dashboard", href: "/", icon: <BarChart2 className="h-4 w-4 mr-2" /> },
+    { label: "Analytics", href: "/analytics", icon: <BarChart2 className="h-4 w-4 mr-2" /> },
+    { label: "Swap", href: "/swap", icon: <Repeat className="h-4 w-4 mr-2" /> },
+    { label: "Governance", href: "/governance", icon: <Vote className="h-4 w-4 mr-2" /> }
   ];
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -33,9 +37,17 @@ const Navbar = () => {
               <Link 
                 key={item.href}
                 to={item.href}
-                className="transition-colors hover:text-foreground/80 text-foreground/60"
+                className={`transition-colors flex items-center ${
+                  isActive(item.href) 
+                    ? "text-foreground font-semibold" 
+                    : "text-foreground/60 hover:text-foreground/80"
+                }`}
               >
+                {item.icon}
                 {item.label}
+                {isActive(item.href) && (
+                  <div className="h-1 w-full bg-primary absolute bottom-0 left-0 rounded-t-md"></div>
+                )}
               </Link>
             ))}
           </nav>
@@ -57,9 +69,14 @@ const Navbar = () => {
                   <Link
                     key={item.href}
                     to={item.href}
-                    className="block py-2 text-foreground transition-colors hover:text-foreground/80"
+                    className={`flex items-center p-2 rounded-md ${
+                      isActive(item.href)
+                        ? "bg-secondary text-foreground"
+                        : "text-foreground/80 hover:bg-secondary/50"
+                    }`}
                     onClick={() => setOpen(false)}
                   >
+                    {item.icon}
                     {item.label}
                   </Link>
                 ))}

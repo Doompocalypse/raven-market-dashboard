@@ -1,3 +1,4 @@
+
 import { io } from 'socket.io-client';
 import { faker } from '@faker-js/faker';
 
@@ -106,6 +107,17 @@ export const getProposals = async (): Promise<ProposalData[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(generateProposals(factions));
+    }, 500);
+  });
+};
+
+export const getProposalsByFaction = async (factionId: string): Promise<ProposalData[]> => {
+  // Simulating API call
+  const factions = generateFactions();
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const allProposals = generateProposals(factions);
+      resolve(allProposals.filter(p => p.factionId === factionId));
     }, 500);
   });
 };
