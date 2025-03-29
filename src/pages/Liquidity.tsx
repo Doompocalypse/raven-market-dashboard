@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,7 @@ const Liquidity = () => {
   const tokens = [
     { symbol: "SOL", name: "Solana", balance: "1.25" },
     { symbol: "USDC", name: "USD Coin", balance: "156.45" },
-    { symbol: "DMC", name: "Raven DMC", balance: "500.00" },
+    { symbol: "DMC", name: "DOOMCOIN", balance: "500.00" },
   ];
 
   const myPositions = [
@@ -62,7 +61,6 @@ const Liquidity = () => {
 
   const handleAmount1Change = (value: string) => {
     setAmount1(value);
-    // Simple price calculation for demo
     if (value && !isNaN(Number(value))) {
       let rate = 1;
       if (token1 === "SOL" && token2 === "USDC") rate = 125;
@@ -80,7 +78,6 @@ const Liquidity = () => {
 
   const handleAmount2Change = (value: string) => {
     setAmount2(value);
-    // Reverse rate calculation
     if (value && !isNaN(Number(value))) {
       let rate = 1;
       if (token2 === "SOL" && token1 === "USDC") rate = 125;
@@ -117,7 +114,6 @@ const Liquidity = () => {
 
     setLoading(true);
     
-    // Simulate API call
     setTimeout(() => {
       toast({
         title: "Liquidity Added Successfully",
@@ -132,7 +128,6 @@ const Liquidity = () => {
   const handleRemoveLiquidity = (positionId: string) => {
     setLoading(true);
     
-    // Simulate API call
     setTimeout(() => {
       toast({
         title: "Liquidity Removed Successfully",

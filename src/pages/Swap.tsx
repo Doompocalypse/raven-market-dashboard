@@ -21,7 +21,7 @@ const Swap = () => {
   const tokens = [
     { symbol: "SOL", name: "Solana" },
     { symbol: "USDC", name: "USD Coin" },
-    { symbol: "DMC", name: "Raven DMC" },
+    { symbol: "DMC", name: "DOOMCOIN" }, // Updated name here
   ];
 
   const handleSwap = () => {
