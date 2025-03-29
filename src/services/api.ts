@@ -1,4 +1,3 @@
-
 import { io } from 'socket.io-client';
 import { faker } from '@faker-js/faker';
 
@@ -53,7 +52,7 @@ const generateFactions = (): FactionData[] => {
     name: ['Ravens', 'Phoenix', 'Dragons', 'Tigers', 'Wolves'][i],
     politicalPower: faker.number.int({ min: 100, max: 1000 }),
     totalStaked: faker.number.int({ min: 10000, max: 1000000 }),
-    apyBoost: faker.number.float({ min: 1, max: 5, precision: 0.1 }),
+    apyBoost: faker.number.float({ min: 1, max: 5, fractionDigits: 1 }),
     icon: ['🦅', '🔥', '🐉', '🐯', '🐺'][i],
   })).sort((a, b) => b.totalStaked - a.totalStaked);
 };
@@ -84,9 +83,9 @@ export const getStakingData = async (): Promise<StakingData> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
-        stakedAmount: faker.number.float({ min: 0, max: 10000, precision: 0.01 }),
-        estimatedApy: faker.number.float({ min: 10, max: 200, precision: 0.1 }),
-        claimableRewards: faker.number.float({ min: 0, max: 1000, precision: 0.01 }),
+        stakedAmount: faker.number.float({ min: 0, max: 10000, fractionDigits: 2 }),
+        estimatedApy: faker.number.float({ min: 10, max: 200, fractionDigits: 1 }),
+        claimableRewards: faker.number.float({ min: 0, max: 1000, fractionDigits: 2 }),
       });
     }, 500);
   });
