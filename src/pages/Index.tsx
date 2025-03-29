@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LiveStats from "@/components/LiveStats";
+import MarketOverview from "@/components/MarketOverview";
 import Navbar from "@/components/Navbar";
 import StakingDashboard from "@/components/StakingDashboard";
 import FactionLeaderboard from "@/components/FactionLeaderboard";
@@ -95,6 +96,9 @@ const Index = () => {
 
           {/* Stats Section */}
           <LiveStats />
+          
+          {/* Market Overview Section */}
+          <MarketOverview />
 
           {/* Main Dashboard Content */}
           <div id="staking" className="pt-6">

@@ -2,6 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import FactionLeaderboard from "@/components/FactionLeaderboard";
 import LiveStats from "@/components/LiveStats";
+import MarketOverview from "@/components/MarketOverview";
 import Navbar from "@/components/Navbar";
 
 const Analytics = () => {
@@ -21,17 +22,7 @@ const Analytics = () => {
 
           <LiveStats />
           
-          <Card>
-            <CardHeader>
-              <CardTitle>Market Overview</CardTitle>
-              <CardDescription>Coming soon - detailed market analytics</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center items-center py-20">
-              <div className="text-center text-muted-foreground">
-                Advanced analytics features will be available soon
-              </div>
-            </CardContent>
-          </Card>
+          <MarketOverview />
 
           <FactionLeaderboard />
         </div>
