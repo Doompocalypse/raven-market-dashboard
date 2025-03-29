@@ -8,6 +8,7 @@ import { WalletContextProvider } from "@/contexts/WalletContext";
 import Index from "./pages/Index";
 import Analytics from "./pages/Analytics";
 import Swap from "./pages/Swap";
+import Liquidity from "./pages/Liquidity";
 import Governance from "./pages/Governance";
 import NotFound from "./pages/NotFound";
 
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/swap" element={<Swap />} />
+            <Route path="/liquidity" element={<Liquidity />} />
             <Route path="/governance" element={<Governance />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

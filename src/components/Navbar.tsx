@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import WalletConnect from "./WalletConnect";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, BarChart2, Repeat, Vote } from "lucide-react";
+import { Menu, BarChart2, Repeat, Vote, TrendingUp } from "lucide-react";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -14,6 +14,7 @@ const Navbar = () => {
     { label: "Dashboard", href: "/", icon: <BarChart2 className="h-4 w-4 mr-2" /> },
     { label: "Analytics", href: "/analytics", icon: <BarChart2 className="h-4 w-4 mr-2" /> },
     { label: "Swap", href: "/swap", icon: <Repeat className="h-4 w-4 mr-2" /> },
+    { label: "Liquidity", href: "/liquidity", icon: <TrendingUp className="h-4 w-4 mr-2" /> },
     { label: "Governance", href: "/governance", icon: <Vote className="h-4 w-4 mr-2" /> }
   ];
 
